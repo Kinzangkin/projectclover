@@ -152,3 +152,47 @@ body {
   font-size: 0.9rem;
   width: 75%;
 }
+
+/* Animasi fade-in untuk scroll */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  opacity: 0;
+  animation-fill-mode: forwards;
+  animation-name: fadeInUp;
+  animation-duration: 0.8s;
+  animation-timing-function: ease-out;
+}
+
+/* Animasi teks sederhana (fade) */
+@keyframes textFade {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.text-fade {
+  animation: textFade 3s ease-in-out infinite;
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}

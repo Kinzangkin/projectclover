@@ -5,7 +5,7 @@ function Joinbtn() {
   return (
     <div>
       <div className="relative group">
-        <Link href={'https://www.tiktok.com/@clovercommunity?_t=ZS-8xhHcMdbYvf&_r=1'}>
+        <Link href={'https://drive.google.com/drive/folders/10prlJa1AxXD0C7xDVFdwx_O7yUfTXao-'}>
           <button
             className="relative inline-block p-px font-semibold leading-6 text-white bg-gray-800 shadow-2xl cursor-pointer rounded-xl shadow-zinc-900 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95">
             <span

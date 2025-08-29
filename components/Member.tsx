@@ -12,7 +12,7 @@ interface MemberCardProps {
 
 function MemberCard({ list }: MemberCardProps) {
     return (
-        <div className="px-80 md:h-[70vh] w-64 mx-4 flex justify-center items-center">
+        <div className="px-20 md:h-[70vh] mx-10 flex justify-center items-center">
 
             <ul className="space-y-1">
                 {list.map((name: string, i: number) => (
@@ -48,7 +48,7 @@ export default function MemberMarquee() {
                     <Memberbtn />
                 </div>
                 <Marquee gradient={false} speed={300}>
-                    <div className="flex gap-6">
+                    <div className="flex gap-20">
                         {groupedMembers.map((group, idx) => (
                             <MemberCard key={idx} title={`Members ${idx + 1}`} list={group} />
                         ))}
