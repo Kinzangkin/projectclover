@@ -8,7 +8,7 @@ export default function Navbar() {
   const toggleMobile = () => setIsMobileOpen(prev => !prev);
 
   return (
-    <nav className="w-full bg-black shadow-md fixed top-0 z-50 animate-fadeIn">
+    <nav className="w-full backdrop-blur-2xl bg-black/20 shadow-md fixed top-0 z-50 animate-fadeIn">
       <div className="max-w-7xl mx-auto flex items-center justify-center p-4">
         <div className="flex items-center space-x-1 md:hidden">
           <div className="text-xl font-bold">Clover</div>
