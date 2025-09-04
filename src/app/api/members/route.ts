@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const data = fs.readFileSync(filePath, 'utf8')
     return NextResponse.json(JSON.parse(data))
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to read file' }, { status: 500 })
   }
 }
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2))
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to add' }, { status: 500 })
   }
 }
@@ -41,7 +41,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 })
   }
 }
@@ -58,7 +58,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
   }
 }
