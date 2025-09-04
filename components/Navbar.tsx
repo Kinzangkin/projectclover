@@ -30,7 +30,7 @@ export default function Navbar() {
           <a href="#hero" className="hover:text-blue-500 transition-all duration-300 hover:scale-110 inline-block">Home</a>
           <a href="#about" className="hover:text-blue-500 transition-all duration-300 hover:scale-110 inline-block">About</a>
           <a href="#member" className="hover:text-blue-500 transition-all duration-300 hover:scale-110 inline-block">Member</a>
-          <a href="#dedication" className="hover:text-blue-500 transition-all duration-300 hover:scale-110 inline-block">dedication</a>
+          <a href="#dedication" className="hover:text-blue-500 transition-all duration-300 hover:scale-110 inline-block">Dedication</a>
         </div>
       </div>
 

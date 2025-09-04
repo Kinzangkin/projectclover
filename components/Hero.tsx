@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react'
 import Joinbtn from './ui/Joinbtn'
 import { gsap } from 'gsap'
+import { Badge } from 'lucide-react';
 
 function Hero() {
   const textRef = useRef(null)
@@ -26,6 +27,7 @@ function Hero() {
         introducing<br />the project clover team
       </div>
       <Joinbtn />
+      <Badge fontVariant={'default |outline | secondary | destructive'} ></Badge>
     </div>
   )
 }

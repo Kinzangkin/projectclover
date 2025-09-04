@@ -9,8 +9,8 @@ export default function Splashscreen({ children }: { children: ReactNode }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setFadeOut(true);
-      setTimeout(() => setLoading(false), 500);
-    }, 2000);
+      setTimeout(() => setLoading(false), 100);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
