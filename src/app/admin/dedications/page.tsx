@@ -22,6 +22,7 @@ export default function DedicationsPage() {
   const [month, setMonth] = useState('')
   const [videoCount, setVideoCount] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   useEffect(() => {
     fetchDedications()
@@ -88,6 +89,7 @@ export default function DedicationsPage() {
       setMonth('')
       setVideoCount('')
       setEditing(null)
+      setIsDialogOpen(false)
       fetchDedications()
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -99,10 +101,12 @@ export default function DedicationsPage() {
   }
 
   const handleEdit = (d: Dedication) => {
+    console.log('Editing dedication:', d)
     setEditing(d)
     setMonth(d.month)
     setVideoCount(d.video_count.toString())
     setErrorMessage(null)
+    setIsDialogOpen(true)
   }
 
   const handleDelete = async (id: number) => {
@@ -138,10 +142,19 @@ export default function DedicationsPage() {
           {errorMessage}
         </div>
       )}
-      <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="default" className='border'>Add Dedication</Button>
-            </DialogTrigger>
+      <Button
+        variant="default"
+        className='border'
+        onClick={() => {
+          setEditing(null)
+          setMonth('')
+          setVideoCount('')
+          setIsDialogOpen(true)
+        }}
+      >
+        Add Dedication
+      </Button>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent aria-describedby="dedication-dialog-description">
           <DialogHeader>
             <DialogTitle>{editing ? 'Edit' : 'Add'} Dedication</DialogTitle>

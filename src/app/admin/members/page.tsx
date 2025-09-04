@@ -20,6 +20,7 @@ export default function MembersPage() {
   const [editing, setEditing] = useState<{ name: string; role: string } | null>(null)
   const [name, setName] = useState('')
   const [role, setRole] = useState('member')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   useEffect(() => {
     fetchMembers()
@@ -34,38 +35,67 @@ export default function MembersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Submitting member:', { editing, name, role })
     if (editing) {
-      await fetch('/api/members', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ oldName: editing.name, newName: name, role: editing.role })
-      })
-      setEditing(null)
+      try {
+        const res = await fetch('/api/members', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ oldName: editing.name, newName: name, role: editing.role })
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          throw new Error(err.error || 'Failed to update member')
+        }
+        setEditing(null)
+      } catch (error) {
+        console.error('Error updating member:', error)
+      }
     } else {
-      await fetch('/api/members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, role })
-      })
+      try {
+        const res = await fetch('/api/members', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, role })
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          throw new Error(err.error || 'Failed to add member')
+        }
+      } catch (error) {
+        console.error('Error adding member:', error)
+      }
     }
     setName('')
     setRole('member')
+    setIsDialogOpen(false)
     fetchMembers()
   }
 
   const handleEdit = (name: string, role: string) => {
+    console.log('Editing member:', { name, role })
     setEditing({ name, role })
     setName(name)
     setRole(role)
+    setIsDialogOpen(true)
   }
 
   const handleDelete = async (name: string, role: string) => {
-    await fetch('/api/members', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, role })
-    })
-    fetchMembers()
+    console.log('Deleting member:', { name, role })
+    try {
+      const res = await fetch('/api/members', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, role })
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to delete member')
+      }
+      fetchMembers()
+    } catch (error) {
+      console.error('Error deleting member:', error)
+    }
   }
 
   if (loading) return <div>Loading...</div>
@@ -74,10 +104,18 @@ export default function MembersPage() {
     <div className="p-4">
       <Navadmin />
       <h1 className="text-2xl font-bold mb-4">Manage Members</h1>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className='border'>Add Member</Button>
-        </DialogTrigger>
+      <Button
+        className='border'
+        onClick={() => {
+          setEditing(null)
+          setName('')
+          setRole('member')
+          setIsDialogOpen(true)
+        }}
+      >
+        Add Member
+      </Button>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editing ? 'Edit' : 'Add'} Member</DialogTitle>
