@@ -6,18 +6,20 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Navadmin from '../components/Navadmin'
+import { supabase } from '@/lib/supabase'
 
-interface MembersData {
-  admins: string[]
-  members: string[]
+interface Member {
+  id: string
+  name: string
+  role: string
 }
 
 export default function MembersPage() {
-  const [data, setData] = useState<MembersData>({ admins: [], members: [] })
+  const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState<{ name: string; role: string } | null>(null)
+  const [editing, setEditing] = useState<Member | null>(null)
   const [name, setName] = useState('')
   const [role, setRole] = useState('member')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -27,85 +29,130 @@ export default function MembersPage() {
   }, [])
 
   const fetchMembers = async () => {
-    const res = await fetch('/api/members')
-    const data = await res.json()
-    setData(data)
-    setLoading(false)
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('members')
+        .select('id, name, role')
+        .order('name')
+      
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
+      
+      setMembers(data || [])
+    } catch (error) {
+      console.error('Error fetching members:', error)
+      alert('Error fetching members. Check console for details.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Submitting member:', { editing, name, role })
-    if (editing) {
-      try {
-        const res = await fetch('/api/members', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ oldName: editing.name, newName: name, role: editing.role })
-        })
-        if (!res.ok) {
-          const err = await res.json()
-          throw new Error(err.error || 'Failed to update member')
-        }
-        setEditing(null)
-      } catch (error) {
-        console.error('Error updating member:', error)
-      }
-    } else {
-      try {
-        const res = await fetch('/api/members', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, role })
-        })
-        if (!res.ok) {
-          const err = await res.json()
-          throw new Error(err.error || 'Failed to add member')
-        }
-      } catch (error) {
-        console.error('Error adding member:', error)
-      }
+    
+    if (!name.trim()) {
+      alert('Please enter a name')
+      return
     }
-    setName('')
-    setRole('member')
-    setIsDialogOpen(false)
-    fetchMembers()
+
+    try {
+      if (editing) {
+        // Update existing member
+        const { error } = await supabase
+          .from('members')
+          .update({ 
+            name: name.trim(), 
+            role 
+          })
+          .eq('id', editing.id)
+          
+        if (error) {
+          console.error('Supabase update error:', error)
+          throw error
+        }
+        alert('Member updated successfully!')
+      } else {
+        // Add new member - hanya kirim field yang diperlukan
+        const { error } = await supabase
+          .from('members')
+          .insert([{ 
+            name: name.trim(), 
+            role 
+          }])
+          
+        if (error) {
+          console.error('Supabase insert error:', error)
+          throw error
+        }
+        alert('Member added successfully!')
+      }
+      
+      // Reset form and refresh data
+      setName('')
+      setRole('member')
+      setEditing(null)
+      setIsDialogOpen(false)
+      fetchMembers()
+    } catch (error) {
+      console.error('Error saving member:', error)
+      alert('Error saving member. Check console for details.')
+    }
   }
 
-  const handleEdit = (name: string, role: string) => {
-    console.log('Editing member:', { name, role })
-    setEditing({ name, role })
-    setName(name)
-    setRole(role)
+  const handleEdit = (member: Member) => {
+    setEditing(member)
+    setName(member.name)
+    setRole(member.role)
     setIsDialogOpen(true)
   }
 
-  const handleDelete = async (name: string, role: string) => {
-    console.log('Deleting member:', { name, role })
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this member?')) {
+      return
+    }
+
     try {
-      const res = await fetch('/api/members', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, role })
-      })
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to delete member')
+      const { error } = await supabase
+        .from('members')
+        .delete()
+        .eq('id', id)
+        
+      if (error) {
+        console.error('Supabase delete error:', error)
+        throw error
       }
+      
+      alert('Member deleted successfully!')
       fetchMembers()
     } catch (error) {
       console.error('Error deleting member:', error)
+      alert('Error deleting member. Check console for details.')
     }
   }
 
-  if (loading) return <div>Loading...</div>
+  // Filter members by role
+  const admins = members.filter(member => member.role === 'admin')
+  const regularMembers = members.filter(member => member.role === 'member')
+
+  if (loading) return (
+    <div className="p-4">
+      <Navadmin />
+      <div className="flex justify-center items-center h-64">
+        <div>Loading members...</div>
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-4">
       <Navadmin />
       <h1 className="text-2xl font-bold mb-4">Manage Members</h1>
+      
       <Button
-        className='border'
+        className='border mb-6'
         onClick={() => {
           setEditing(null)
           setName('')
@@ -113,8 +160,9 @@ export default function MembersPage() {
           setIsDialogOpen(true)
         }}
       >
-        Add Member
+        Add New Member
       </Button>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -122,14 +170,21 @@ export default function MembersPage() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Label htmlFor="name">Name *</Label>
+              <Input 
+                id="name" 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                required 
+                placeholder="Enter member name"
+                maxLength={255} // Sesuai dengan character varying
+              />
             </div>
             <div>
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role">Role *</Label>
               <Select value={role} onValueChange={setRole}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="member">Member</SelectItem>
@@ -137,50 +192,134 @@ export default function MembersPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit">{editing ? 'Update' : 'Add'}</Button>
+            <div className="flex gap-2 pt-2">
+              <Button type="submit" className="flex-1">
+                {editing ? 'Update' : 'Add'} Member
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
-      <h2 className="text-xl font-semibold mt-6">Admins</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.admins.map((admin) => (
-            <TableRow key={admin}>
-              <TableCell>{admin}</TableCell>
-              <TableCell>
-                <Button onClick={() => handleEdit(admin, 'admin')} className="mr-2">Edit</Button>
-                <Button onClick={() => handleDelete(admin, 'admin')} variant="destructive">Delete</Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <h2 className="text-xl font-semibold mt-6">Members</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.members.map((member) => (
-            <TableRow key={member}>
-              <TableCell>{member}</TableCell>
-              <TableCell>
-                <Button onClick={() => handleEdit(member, 'member')} className="mr-2">Edit</Button>
-                <Button onClick={() => handleDelete(member, 'member')} variant="destructive">Delete</Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+
+      <div className="grid gap-8 mt-8">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Admins ({admins.length})</h2>
+          {admins.length === 0 ? (
+            <p className="text-gray-500">No admins found</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {admins.map((admin) => (
+                  <TableRow key={admin.id}>
+                    <TableCell className="text-xs text-gray-500 font-mono">
+                      {admin.id.substring(0, 8)}...
+                    </TableCell>
+                    <TableCell className="font-medium">{admin.name}</TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
+                        {admin.role}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleEdit(admin)}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => handleDelete(admin.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Members ({regularMembers.length})</h2>
+          {regularMembers.length === 0 ? (
+            <p className="text-gray-500">No members found</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {regularMembers.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell className="text-xs text-gray-500 font-mono">
+                      {member.id.substring(0, 8)}...
+                    </TableCell>
+                    <TableCell className="font-medium">{member.name}</TableCell>
+                    <TableCell>
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                        {member.role}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleEdit(member)}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => handleDelete(member.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </div>
+
+      {/* Debug Info */}
+      <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+        <h3 className="text-sm font-semibold mb-2">Database Info:</h3>
+        <p className="text-xs text-gray-600">
+          Table: members | Columns: id (uuid), name (varchar), role (varchar)
+        </p>
+        <p className="text-xs text-gray-600">
+          Total records: {members.length}
+        </p>
+      </div>
     </div>
   )
 }

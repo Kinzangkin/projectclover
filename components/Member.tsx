@@ -1,23 +1,26 @@
 'use client'
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Marquee from "react-fast-marquee";
-import data from "../nama.json";
 import Memberbtn from "./ui/Memberbtn";
 
 interface MemberCardProps {
     title: string;
-    list: string[];
+    list: { name: string }[];
+}
+
+interface MembersData {
+    admins: { name: string }[];
+    members: { name: string }[];
 }
 
 function MemberCard({ list }: MemberCardProps) {
     return (
         <div className="px-20 md:h-[70vh] mx-10 flex justify-center items-center">
-
             <ul className="space-y-1">
-                {list.map((name: string, i: number) => (
+                {list.map((member, i: number) => (
                     <li key={i} className="text-white md:text-9xl text-6xl text-center">
-                        {name}
+                        {member.name}
                     </li>
                 ))}
             </ul>
@@ -34,6 +37,45 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 }
 
 export default function MemberMarquee() {
+    const [data, setData] = useState<MembersData>({ admins: [], members: [] });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchMembers = async () => {
+            try {
+                const res = await fetch('/api/members');
+                if (!res.ok) {
+                    throw new Error('Failed to fetch members');
+                }
+                const json = await res.json();
+                setData(json);
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                setError('Failed to load members data');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMembers();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-white text-xl">Loading members...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-red-500 text-xl">{error}</div>
+            </div>
+        );
+    }
+
     const groupedMembers = chunkArray(data.members, 5);
 
     return (
