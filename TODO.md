@@ -1,5 +1,0 @@
-- [x] Analyze the issue with Supabase data display
-- [x] Fix API route to return proper object structure
-- [ ] Test API endpoint returns correct format
-- [ ] Verify data displays on Team page
-- [ ] Verify data displays on Member component
