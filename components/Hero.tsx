@@ -3,7 +3,8 @@
 import React, { useEffect, useRef } from 'react'
 import Joinbtn from './ui/Joinbtn'
 import { gsap } from 'gsap'
-import { Badge } from 'lucide-react';
+import { Badge } from "@/components/ui/badge"
+
 
 function Hero() {
   const textRef = useRef(null)
@@ -27,7 +28,15 @@ function Hero() {
         introducing<br />the project clover team
       </div>
       <Joinbtn />
-      <Badge fontVariant={'default |outline | secondary | destructive'} ></Badge>
+      <div className='gap-10'>  
+      <Badge variant="default" className='m-1'>{'#clovthetime'}</Badge>
+      <Badge variant="secondary" className='m-1'>{'#projectclov'}</Badge>
+      <Badge variant="destructive" className='m-1'>{'#barudakclv'}</Badge>
+      <Badge variant="outline" className='m-1'>{'#cloverdevil'}</Badge>
+      <Badge variant="default" className='m-1'>{'#clovthebattle'}</Badge>
+      <Badge variant="secondary" className='m-1'>{'#clvstd'}</Badge>
+      <Badge variant="destructive" className='m-1'>{'#clvpj'}</Badge>
+      </div>
     </div>
   )
 }

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "Project Clover",
   description: "team editing and comunity",
   icons: {
-    icon: '../Img/logo.png'
+    icon: "/Img/logo.png"
   },
 };
 

@@ -91,7 +91,7 @@ export default function DedicationStats() {
           </select>
         </div>
       </CardHeader>
-      <CardContent style={{ width: '100%', maxWidth: 900 }}>
+      <CardContent style={{ width: '100%', maxWidth: 1100 }}>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart
             data={completeData}
