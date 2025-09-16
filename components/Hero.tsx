@@ -20,7 +20,7 @@ function Hero() {
   }, [])
 
   return (
-    <div className='flex justify-center md:h-screen h-[90vh] flex-col md:pl-[340px] pl-9 md:gap-y-5'>
+    <div className='flex justify-center md:h-screen sm:h-[90vh] h-[50px] flex-col md:pl-[340px] pl-9 md:gap-y-5'>
       <div
         ref={textRef}
         className='md:text-6xl text-2xl text-fade'
