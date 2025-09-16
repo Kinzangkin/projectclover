@@ -80,7 +80,7 @@ export default function MemberMarquee() {
 
     return (
         <div>
-            <div className="flex flex-col items-center md:p-20 md:mt-0 mt-60">
+            <div className="flex flex-col items-center md:p-20 md:mt-0 mt-5">
                 <div className="relative mr-[35%] text-4xl md:p-5 "><h1>Core Team</h1></div>
                 <div className="md:w-3xl w-50 h-1 bg-white"></div>
             </div>
